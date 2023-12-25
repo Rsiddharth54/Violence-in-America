@@ -1,0 +1,512 @@
+---
+title: "Final Project!"
+author: "Rishi Siddharth"
+date: "2023-12-09"
+introduction: "Introduction"
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth : 2
+    theme:
+      bootswatch: solar
+---
+1 - Introduction 
+--------------------------------------
+
+The data itself - Guns/Violence in America.
+
+Gun violence is an ongoing problem in modern America. A lot of people are divided on the issue of gun control, however the numbers speak for themselves. Every year nearly 40,000 Americans are killed by guns, including more than 23,000 who die by firearm suicide, 14,000 who die by firearm homicide, more than 500 who die by legal intervention, nearly 500 who die by unintentional firearm injuries, and more than 300 who die by undetermined intent.
+
+First, let me explain the variables + the data set
+
+
+This is a  data frame containing 1,173 observations on 13 variables. The following variables consist of : 
+
+state : factor indicating state.
+
+year:factor indicating year
+
+violent : violent crime rate (incidents per 100,000 members of the population).
+
+murder : murder rate (incidents per 100,000).
+
+robbery : robbery rate (incidents per 100,000).
+
+prisoners : incarceration rate in the state in the previous year (sentenced prisoners per 100,000 
+
+residents; value for the previous year).
+
+afam : percent of state population that is African-American, ages 10 to 64.
+
+cauc : percent of state population that is Caucasian, ages 10 to 64.
+
+male : percent of state population that is male, ages 10 to 29.
+
+population : state population, in millions of people.
+
+income : real per capita personal income in the state (US dollars).
+
+density: population per square mile of land area, divided by 1,000.
+
+law : factor. Does the state have a shall carry law in effect in that year?
+
+
+1a - Functionality
+--------------------------------------
+
+
+In this dataset we can see the data for violence, murder, robberies, priosners, and some races of each state's population. There are also other variables we can explore in this dataset for further analyzation of what causes these crimes in certain states by making correlations, without implying causation.Furthermore, in this lecture, I am going to breakdown this data by most pertaining factors that are an issue around gun laws/gun control. 
+
+
+
+
+
+
+
+
+
+1b - Methodology + Main point of lecture
+--------------------------------------
+
+The main point of this lecture is to learn how to manipulate and clean data. This can be used through the library, dplyr. Dplyr is arguably one of the most important libraries on R. It can be used for data cleaning, manipulation, and creation of new variables. 
+
+
+Objective - 
+When working with data you must:
+
+ - Figure out what you want to do.
+
+ - Describe those tasks in the form of a computer program.
+
+ - Execute the program.
+ 
+ 
+ Execution -
+  -In order to perform the dplyr we need to learn the syntax.
+  -You must use %>% to transform datasets. 
+    - For example :
+ 
+ If I had a dataset called cars and I wanted to transform it I would do the following
+ 
+Cars_2 <- Cars %>%
+  rename(#one of the most common )%>% #apply it again!
+  mutate%>%
+  filter%>%
+  arrange%>%
+  select
+  
+Cars_2
+
+These are some of the most common uses of the dplyr package, and why we will be using it intensively today.
+  
+
+
+Table of contents
+--------------------------------------
+
+1 - Introduction
+2 - Understanding the data further
+3 - Preparation
+4 - Reading in the data
+5 - Data cleaning
+6 - Getting key numbers - summaries, means, medians of the data
+7 - plots (ggplots) + explanations plus significance
+8 - US map plot (new library)
+9 - More statistics based on plots
+10 - Correlations
+11 - More!
+12 - Conclusion
+12- Takeaways
+
+
+
+
+2 - Understanding the data further
+--------------------------------------
+
+Each observation is a given state in a given year. There are a total of 51 states times 23 years = 1,173 observations.
+This data set is between the years 1977–1999. Although somewhat old, it is still accurate to numbers today. 
+
+
+
+2 - Preparation!
+    Reading in the necessary libraries 
+
+```{r}
+
+library(readr) 
+library(ggplot2) 
+library(dplyr)
+library(forcats)
+library(lubridate) 
+
+```
+3 - Reading in the data!
+--------------------------------------
+We do this by using read.csv and making sure the directory is correct
+```{r}
+Guns <- read.csv('/Users/rishisiddharth/Desktop/Data_412/DataSets/guns.csv')
+```
+
+
+4 - Data cleaning
+--------------------------------------
+There are many other methods/ways to data clean given the dataset, but this dataset is good for the majority of things. For this dataset all we need to do in rename variables and to create new varirables 
+
+4a -renaming certain variables for further clarification 
+```{r}
+
+Guns <- Guns %>%
+  rename(africanAmerican = afam, violence = violent, caucasian = cauc)
+
+head(Guns, n = 20)
+```
+4b - Creating new variables
+we can rename the columns for them to make more sense 
+```{r}
+# Creating abbreviation for states
+Guns <- Guns %>%
+  mutate(states_abb = substr(state, 1, 2))
+```
+we can mutate certain variables to make new variables, like we did here 
+
+5 - Getting key numbers
+--------------------------------------
+ We can calculate things such murders per state
+```{r}
+Guns <- Guns %>% #same dataframe
+  group_by(state) %>% #group by state to make it clear
+  mutate(murder_per_state = mean(murder, na.rm = TRUE)) %>% #mutate, and create the new variable with the mean murder amount 
+  ungroup() 
+```
+Keep in mind this is throughout all 22 years! By grouping the state, we can get the amount of murders per state during the 22 years
+
+```{r}
+
+
+# Calculating the violence per state, same concept
+Guns <- Guns %>%
+  group_by(state) %>%
+  mutate(violence_per_state = mean(violence, na.rm = TRUE)) %>%
+  ungroup()  
+
+#if we do the same thing, we can get the mean amount of robberies during the 22 years!
+
+# Calculating robberies per state
+Guns <- Guns %>%
+  group_by(state) %>%
+  mutate(robberies_per_state = mean(robbery, na.rm = TRUE)) %>%
+  ungroup()
+#same thing for robberies! This gives us an insight to which state has the most murders, robbery, prisoners
+
+
+# Calculating prisoners per state
+Guns <- Guns %>%
+  group_by(state) %>%
+  mutate(prisoners_per_state = mean(prisoners, na.rm = TRUE)) %>%
+  ungroup()  # Ungrouping after the operation
+Guns
+```
+Same thing here. We can see here that D.C ironically has the most murders, most violence, robberies, and prisoners according to this dataset. Although we found the state with the most for these varirables, we could make it easier on ourselves instead of creating these columns and scrolling through the data manually, we can....
+
+
+However - Before that lets discuss in further data preparation.
+
+Data preparation - Some struggles I faced were figuring out how I needed to clean/manipulate the data in order to perform the stastical test as I wanted to. In all my years of performing statistical tests there has been one thing I have learned; have a plan. My plan for this dataset forced me to think of my questions of the dataset at the very beginning, which allowed me to create a plan, thus being able to execute the first, and most important steps: data manipulation. If one were to mess this step up, the statistical performance wouldn't be most optimal, and the overall project would lack consistency. 
+
+```{r}
+# We can create a new dataframe called Guns_summary
+Guns_summary <- Guns %>%
+  group_by(state, year) %>%
+  summarise(
+    average_violent = mean(violence, na.rm = TRUE), # Replace 'violence' with the correct column name if different
+    average_murder = mean(murder, na.rm = TRUE),
+    average_robbery = mean(robbery, na.rm = TRUE),
+    average_prisoners = mean(prisoners, na.rm = TRUE),
+    .groups = 'drop' # This will ungroup the data after summarisation
+  )
+
+Guns_summary
+#First, we can 
+
+# Find the state with the most murders, ensure the data is ungrouped
+state_most_murders <- Guns_summary %>%
+  ungroup() %>%  # Remove any existing grouping
+  arrange(desc(average_murder)) %>%
+  slice_head(n = 1)
+
+#state with the most prisoners, ensure the data is ungrouped
+state_most_prisoners <- Guns_summary %>%
+  ungroup() %>%  # Remove any existing grouping
+  arrange(desc(average_prisoners)) %>%
+  slice_head(n = 1)
+
+
+#state withe most robberiers
+state_most_robberies <- Guns_summary %>%
+  ungroup() %>%  # Remove any existing grouping
+  arrange(desc(average_robbery)) %>%
+  slice_head(n = 1)
+
+# Printing the state with the most murders
+print("State with the most murders:")
+print(state_most_murders)
+
+# Printing the state with the most prisoners
+print("State with the most prisoners:")
+print(state_most_prisoners)
+
+
+#printing the state with most robberies
+print("State with the most robberies:")
+print(state_most_robberies)
+```
+As seen in the print statements, it's confirmed D.C unfortunately the most murders, robberies, and prisoners, now,  we can addd a column to indicate the time period (since it's only one period, all values will be the same).
+```{r}
+Guns <- Guns %>%
+  mutate(period = "1977-1999")
+```
+Firstly, notice how we are still using dplyr throughout this lecture, even if we aren't cleaning/manipulating the data.
+
+
+6 - Plots to show the data
+--------------------------------------
+  1.creating a bar graph that compares each state based on murders, robberies 
+  2. sum of the murders and robberies for each state
+```{r}
+Guns_summed <- Guns %>%
+  group_by(state) %>%
+  summarise(murder_sum = sum(murder, na.rm = TRUE),
+            robbery_sum = sum(robbery, na.rm = TRUE),
+            prisoner_sum = sum(prisoners,na.rm = TRUE))
+```
+Now create the bar graph with ggplot
+```{r}
+barplt <- ggplot(data = Guns_summed, aes(x = state)) +  
+  geom_bar(aes(y = murder_sum), stat = "identity", position = "dodge", fill = "blue") +
+  geom_bar(aes(y = prisoner_sum), stat = "identity", position = "dodge", fill = "red") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+print(barplt)
+```
+After a thorough analysis of the bar graph, it confirms that D.C has the highest murder rate in these years.
+
+```{r}
+plot2 <- ggplot(data = Guns_summed, aes(x = state)) + 
+  geom_bar(aes(y = murder_sum), stat = "identity", position = "dodge", fill = "blue") + 
+  geom_bar(aes(y = robbery_sum), stat = "identity", position = "dodge", fill = "red") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+print(plot2)
+```
+These plots show, that ironically, in the District of Columbia, there are the most violent crime rates
+7 - U.S MAP?
+--------------------------------------
+  1. Install and load required libraries
+  2. Using the new package (leaflet), plus a new dataset of US states,  we can plot the US maps, and join the Guns data to see the states with the most murders in the years
+
+```{r}
+library(leaflet)
+library(usmap)
+library(dplyr)
+
+plot_usmap(data = Guns, values = "murder", regions = "states") + #we use the old data set Guns to get the values of murder. New dataset to get the regions
+  scale_fill_continuous(low = "white", high = "red", name = "Murders", label = scales::comma) + #these are just commands to make the graph look pretty
+  labs(title = "Murder Rate by State",
+       subtitle = "Number of murders represented by color intensity.") + 
+  theme(legend.position = "right")
+
+plot_usmap(data = Guns, values = "prisoners", regions = "states") + #do the same thing but do prisoners!
+  scale_fill_continuous(low = "white", high = "red", name = "Murders", label = scales::comma) + 
+  labs(title = "Prisoner Rate by State",
+       subtitle = "Number of prisoners represented by color intensity.") + 
+  theme(legend.position = "right")
+
+plot_usmap(data = Guns, values = "robbery", regions = "states") + 
+  scale_fill_continuous(low = "white", high = "red", name = "Murders", label = scales::comma) + 
+  labs(title = "Robbery Rate by State",
+       subtitle = "Number of robberies represented by color intensity.") + 
+  theme(legend.position = "right")
+```
+Given the information thats given, lets revist the top state/place with the highest rates for murder, robbery, and violence: Washington D.C.
+```{r}
+WashingtonDC_Afac <- Guns %>%
+  select(state, africanAmerican)  %>%
+  filter(state == "District of Columbia")%>%
+  summarise(average_afac = mean(africanAmerican, na.rm = TRUE))
+WashingtonDC_Afac
+```
+23.9 percent of state population if African American
+```{r}
+WashingtonDC_cauc <- Guns%>%
+  select(state, caucasian)%>%
+  filter(state == "District of Columbia")%>%
+  summarise(average_cauc = mean(caucasian,na.rm = TRUE))
+WashingtonDC_cauc
+```
+24.9 % of state population is Caucasian
+```{r}
+Afac_plot <- ggplot(Guns, aes(x = "", y = africanAmerican, fill = state)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") + 
+  labs(fill = "State", y = "African American (%)", x = "") +
+  theme_void()  
+
+print(Afac_plot)
+```
+
+Given the pie chart, it shows that D.C has the most African Americans and murder rate, prisoner rate, and robbery rate. But are they correlated?
+```{r}
+Cauc_plot <- ggplot(Guns, aes(x = "", y = caucasian, fill = state)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") + # This converts the bar chart to a pie chart
+  labs(fill = "State", y = "African American (%)", x = "") + # Add labels
+  theme_void()  # This removes the background, gridlines, and text
+
+print(Cauc_plot)
+```
+This pie chart shows that Vermont has the highest Caucasian rate, however it is hard to tell. Lets find another way to find the state with the most caucasians
+
+
+8 - More statistics based on plots
+--------------------------------------
+```{r}
+state_order_caucasian <- Guns %>%
+  select(state, caucasian) %>%
+  arrange(desc(caucasian))
+state_order_caucasian
+```
+this shows the order of state with the most Caucasians. Vermont wins, with a wopping 76.5% rate in one year!
+```{r}
+state_order_afac <- Guns%>%
+  select(state, africanAmerican)%>%
+  arrange(desc(africanAmerican))
+state_order_afac
+```
+We can do the same thing here, and we confirm that Hawaii has the most African American population with 27%, with D.C closely behind at 25.9%
+
+
+9 - Correlations
+--------------------------------------
+
+D.C has the highest murder, prison, and robbery rate. It also has the highest population of African Americans.
+
+But are they actually correlated?
+
+We are going to use spearmans test. This is because it measures the strength and direction of association between two ranked variables.
+#we are also going to do income and murder first, as a practice run
+```{r}
+spearman <- ggplot(data = Guns, mapping = aes(x = murder, y = income)) +
+  geom_point()
+
+print(spearman)
+```
+A few observations about the plot:
+
+Data Concentration: Most of the data points are clustered at the lower end of the murder count, which suggests that in the majority of the observations, the murder count is low.
+
+No Clear Trend: There is no clear upward or downward trend visible in the scatter plot that would indicate a strong positive or negative correlation between income and murder count.
+
+Outliers: There seem to be a few potential outliers with higher murder counts, but these do not appear to follow any trend with respect to income.
+
+Okay to use
+```{r}
+spearman_test <- cor.test(Guns$murder, Guns$income, method = "spearman")
+print(spearman_test)
+```
+The p-value is 0.4869, which is not below the common alpha level threshold of 0.05 for statistical significance. This high p-value suggests that you cannot reject the null hypothesis, which is that there is no monotonic association between the two variables. 
+
+
+
+Now we are going to do it for murder and African American percentage
+```{r}
+spearman_assumptions <- ggplot(data = Guns, mapping = aes(x = africanAmerican, y = murder)) +
+  geom_point()
+
+print(spearman_assumptions)
+
+spearman_test <- cor.test(Guns$murder, Guns$africanAmerican, method = "spearman")
+print(spearman_test)
+```
+The positive rho value signifies that as the value of the africanAmerican variable increases, the number of murders tends to increase as well. The relationship is monotonic, which means that the variables tend to move in the same direction, but not necessarily at a constant rate across the entire range of values.
+
+The p-value is less than 2.2e-16, which is essentially zero, and it indicates that the observed correlation is extremely statistically significant. This means that the probability of obtaining such a correlation by random chance is virtually non-existent, assuming the null hypothesis of no relationship was true.
+
+That being said correlation doesn't cause causation!
+
+
+
+10 - More! 
+--------------------------------------
+
+USAfacts.org posted an article on November 8, 2023, which showed the highest murder rates. In their article, they state "Although Washington, DC, had a higher homicide death rate (33.3 homicide deaths per 100,000 people) than every state, it’s not a state — given its population density, a fairer comparison is to counties in major metropolitan areas." This is exactly what our data showed, which, like the article states, is somewhat of an unfair compariosn due to it's population density. 
+
+https://usafacts.org/articles/which-states-have-the-highest-murder-rates/
+
+That being said we can do one more test that compares population density with murder rate to give a more acurate comparison. First lets find the city with the highest population density
+```{r}
+state_order_density <- Guns%>%
+  select(state, density)%>%
+  arrange(desc(density))
+state_order_density
+```
+The population per square mile of land area is huge compared to other states...
+lets perform another statistical test to test this further satisty the requirments.
+```{r}
+ggplot(Guns, aes(x =density, y = murder)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Population Density", y = "Murder Rate", 
+       title = "Scatter Plot of Murder Rate vs Population Density")
+```
+Lets change the scale to make it more even
+```{r}
+ggplot(Guns, aes(x = density, y = murder)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_log10() +
+  labs(x = "Population Density (log scale)", y = "Murder Rate",
+       title = "Scatter Plot of Murder Rate vs Population Density (Log Scale)") +
+  theme_minimal()
+```
+Much better - There is a visible positive trend, as indicated by the linear regression line. This suggests that there is a tendency for the murder rate to increase with population density, at least within the range of data points that are more densely packed.
+
+Step 3: Regression Analysis
+```{r}
+regression_result <- lm(murder ~ density, data = Guns)
+summary(regression_result)
+```
+Conclusion
+
+
+Overall, the model suggests that there is a significant positive relationship between population density and murder rates. However, it's important to note that correlation does not imply causation, and other factors not included in the model may influence murder rates.That being said, due to the multiple R-squared value being 0.5604, we know that 56% of the murder rate is based on popultion density.
+
+11 - Conclusion 
+-----------------------------------
+In this data set we focused on many of the variables/factors that affected murder, prison, and robbery rate in the U.S. We broke down this dataset by calculating simple statistics from the data, then grouping variables to find new numbers based on certain years, states, and etc. We were able to do this by using the dplyr package to create new variables, manipulate variables, and filter them. It was succesfful as we were able to find the states with the highest murder rate etc. After this, we comapred all 51 states (D.C) with a few bar graph, using the ggplot package. Then, we were able to graph the whole of the US using the leaflet and U.S map package, to give a visual of the most states with said rates of crimes. Given this information, we were able to analyze certain states and explore correlations with variables within the data. We were able to conclude all of this information with a thorough lecture of integrating tidyverse, dplyr, readr, ggplot, leaflet, and the US map packages together to complete a detailed analysis of this dataset. 
+
+
+12 - Takeaways
+--------------------------------------
+The key takeaway from this lecture is not so much the pretty graphs or the complicated test statistics, but more so the use and the functionality of the dplyr package. By using this package we were able to create new variables, manipulate current variables, and clean the data. Over 60% of the work of a data scientist is cleaning data, as most data sets aren't pretty. This is a neccesary skill to have; whether it be in R, python, or stata, etc. 
+
+
+
+
+
+
+
+
+
+
+The source of this dataset is follows. Online complements to Stock and Watson (2007).
+References - 
+Ayres, I., and Donohue, J.J. (2003). Shooting Down the ‘More Guns Less Crime’ Hypothesis. Stanford Law Review, 55, 1193–1312.
+Stock, J.H. and Watson, M.W. (2007). Introduction to Econometrics, 2nd ed. Boston: Addison Wesley.
+  
+
+```
+
+```{r}
+
+
+```
+
